@@ -14,6 +14,10 @@ eDP2
 DP2-1
 DP2-2
 
+$ xrandrl --enabled 
+eDP2
+DP2-2
+
 $ xrandrl --connected --disabled
 DP2-1
 

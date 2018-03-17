@@ -132,11 +132,16 @@ def get_xrandr_output_infos(xdisplay):
             for o in range(screen_resrcs.contents.noutput)]
 
 
-def process(connected, disabled):
+def get_xrandr_output_enabled(output_info):
+    return output_info.contents.crtc != 0
+
+
+def process(connected, disabled, enabled):
     xdisplay = X11.XOpenDisplay(None)
     for output_info in get_xrandr_output_infos(xdisplay):
         if ((not connected or output_info.contents.connection == RR_Connected)
-                and (not disabled or output_info.contents.crtc == 0)):
+                and (not disabled or not get_xrandr_output_enabled(output_info))
+                and (not enabled or get_xrandr_output_enabled(output_info))):
             output_name = output_info.contents.name \
                 .decode(sys.getfilesystemencoding())
             print(output_name)
@@ -155,6 +160,11 @@ def _init_argparser():
         '--disabled',
         action='store_true',
         help='disabled only (does not imply --connected)',
+    )
+    argparser.add_argument(
+        '--enabled',
+        action='store_true',
+        help='enabled only (does not imply --connected)',
     )
     return argparser
 
