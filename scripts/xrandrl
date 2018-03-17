@@ -133,20 +133,24 @@ def get_xrandr_output_infos(xdisplay):
             for o in range(screen_resrcs.contents.noutput)]
 
 
-def process():
+def process(connected):
     xdisplay = X11.XOpenDisplay(None)
     for output_info in get_xrandr_output_infos(xdisplay):
-        output_name = output_info.contents.name \
-            .decode(sys.getfilesystemencoding())
-        print(output_name)
-        # if output_info.contents.connection == RR_Connected:
-        #     print(output_name)
+        if not connected or output_info.contents.connection == RR_Connected:
+            output_name = output_info.contents.name \
+                .decode(sys.getfilesystemencoding())
+            print(output_name)
     X11.XCloseDisplay(xdisplay)
 
 
 def _init_argparser():
     import argparse
     argparser = argparse.ArgumentParser(description=None)
+    argparser.add_argument(
+        '--connected',
+        action='store_true',
+        help='connected only',
+    )
     return argparser
 
 
