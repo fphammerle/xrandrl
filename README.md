@@ -1,5 +1,7 @@
 # xrandrl
 
+show names of outputs available to x server.
+
 ## Requirements
 
 ```{sh}
@@ -14,7 +16,7 @@ eDP2
 DP2-1
 DP2-2
 
-$ xrandrl --enabled 
+$ xrandrl --enabled
 eDP2
 DP2-2
 

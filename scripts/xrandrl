@@ -152,17 +152,17 @@ def _init_argparser():
     import argparse
     argparser = argparse.ArgumentParser(description=None)
     argparser.add_argument(
-        '--connected',
+        '-c', '--connected',
         action='store_true',
         help='connected only',
     )
     argparser.add_argument(
-        '--disabled',
+        '-d', '--disabled',
         action='store_true',
         help='disabled only (does not imply --connected)',
     )
     argparser.add_argument(
-        '--enabled',
+        '-e', '--enabled',
         action='store_true',
         help='enabled only (does not imply --connected)',
     )
