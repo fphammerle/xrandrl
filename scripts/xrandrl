@@ -2,7 +2,6 @@
 # PYTHON_ARGCOMPLETE_OK
 
 """
-sudo apt-get install libx11-dev libxrandr-dev
 https://cgit.freedesktop.org/xorg/app/xrandr/tree/xrandr.c
 """
 
@@ -133,10 +132,11 @@ def get_xrandr_output_infos(xdisplay):
             for o in range(screen_resrcs.contents.noutput)]
 
 
-def process(connected):
+def process(connected, disabled):
     xdisplay = X11.XOpenDisplay(None)
     for output_info in get_xrandr_output_infos(xdisplay):
-        if not connected or output_info.contents.connection == RR_Connected:
+        if ((not connected or output_info.contents.connection == RR_Connected)
+                and (not disabled or output_info.contents.crtc == 0)):
             output_name = output_info.contents.name \
                 .decode(sys.getfilesystemencoding())
             print(output_name)
@@ -150,6 +150,11 @@ def _init_argparser():
         '--connected',
         action='store_true',
         help='connected only',
+    )
+    argparser.add_argument(
+        '--disabled',
+        action='store_true',
+        help='disabled only (does not imply --connected)',
     )
     return argparser
 
