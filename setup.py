@@ -10,9 +10,8 @@ setup(
     description='',
     author='Fabian Peter Hammerle',
     author_email='fabian@hammerle.me',
-    url='https://git.hammerle.me/fphammerle/xrandrl',
-    # download_url =
-    # 'https://github.com/fphammerle//tarball/{}'.format(version),
+    url='https://github.com/fphammerle/xrandrl',
+    download_url = 'https://github.com/fphammerle/xrandrl/tarball/{}'.format(version),
     keywords=[],
     classifiers=[],
     scripts=glob.glob('scripts/*'),

@@ -8,6 +8,12 @@ Show names of outputs available to the X server.
 sudo apt-get install python3 libx11-dev libxrandr-dev
 ```
 
+## Installation
+
+```{sh}
+$ pip3 install --user --upgrade git+https://github.com/fphammerle/xrandrl
+```
+
 ## Usage
 
 ```
