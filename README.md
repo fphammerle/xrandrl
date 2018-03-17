@@ -1,6 +1,6 @@
 # xrandrl
 
-show names of outputs available to x server.
+Show names of outputs available to the X server.
 
 ## Requirements
 
@@ -8,7 +8,19 @@ show names of outputs available to x server.
 sudo apt-get install python3 libx11-dev libxrandr-dev
 ```
 
-## Examples
+## Usage
+
+```
+xrandrl [-h] [-c] [-d] [-e]
+
+optional arguments:
+  -c, --connected  connected only
+  -d, --disabled   disabled only (does not imply --connected)
+  -e, --enabled    enabled only (does not imply --connected)
+  -h, --help       show help message and exit
+```
+
+### Examples
 
 ```{sh}
 $ xrandrl --connected

@@ -150,7 +150,9 @@ def process(connected, disabled, enabled):
 
 def _init_argparser():
     import argparse
-    argparser = argparse.ArgumentParser(description=None)
+    argparser = argparse.ArgumentParser(
+        description='Show names of outputs available to the X server.',
+    )
     argparser.add_argument(
         '-c', '--connected',
         action='store_true',
