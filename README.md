@@ -2,6 +2,8 @@
 
 Show names of outputs available to the X server.
 
+This script uses python's ctypes library to access *libX11* and *libXrandr*.
+
 ## Requirements
 
 ```{sh}
