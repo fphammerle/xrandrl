@@ -123,13 +123,31 @@ XRRGetOutputInfo (Display *dpy, XRRScreenResources *resources, RROutput output);
 Xrandr.XRRGetOutputInfo.restype = ctypes.POINTER(X_XRROutputInfo)
 
 
+class RandrScreenResources:
+
+    def __init__(self, xdisplay, window):
+        self._xdisplay = xdisplay
+        self._p = Xrandr.XRRGetScreenResourcesCurrent(xdisplay, window)
+
+    def __del__(self):
+        libc.free(self._p)
+
+    @property
+    def outputs(self):
+        return [self._p.contents.outputs[o] for o in range(self._p.contents.noutput)]
+
+    def get_output_infos(self):
+        return [RandrOutputInfo(self, o) for o in self.outputs]
+
+
 class RandrOutputInfo:
 
-    def __init__(self,
-                 xdisplay,
-                 screen_resrcs: ctypes.POINTER(X_XRRScreenResources),
-                 output: X_RROutput):
-        self._p = Xrandr.XRRGetOutputInfo(xdisplay, screen_resrcs, output)
+    def __init__(self, screen_resrcs: RandrScreenResources, output: X_RROutput):
+        self._p = Xrandr.XRRGetOutputInfo(
+            screen_resrcs._xdisplay,
+            screen_resrcs._p,
+            output,
+        )
 
     def __del__(self):
         libc.free(self._p)
@@ -147,19 +165,13 @@ class RandrOutputInfo:
         return self._p.contents.name.decode()
 
 
-def get_xrandr_output_infos(xdisplay):
-    screen_resrcs = Xrandr.XRRGetScreenResourcesCurrent(
+def process(connected, disabled, enabled):
+    xdisplay = X11.XOpenDisplay(None)
+    screen_resrcs = RandrScreenResources(
         xdisplay,
         X11.XDefaultRootWindow(xdisplay),
     )
-    assert isinstance(screen_resrcs.contents, X_XRRScreenResources)
-    return [RandrOutputInfo(xdisplay, screen_resrcs, screen_resrcs.contents.outputs[o])
-            for o in range(screen_resrcs.contents.noutput)]
-
-
-def process(connected, disabled, enabled):
-    xdisplay = X11.XOpenDisplay(None)
-    for output_info in get_xrandr_output_infos(xdisplay):
+    for output_info in screen_resrcs.get_output_infos():
         if ((not connected or output_info.connected)
                 and (not disabled or not output_info.enabled)
                 and (not enabled or output_info.enabled)):
