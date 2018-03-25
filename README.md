@@ -29,6 +29,7 @@ optional arguments:
   -e, --enabled    enabled only (does not imply --connected)
   -b, --backlight  outputs with backlight configurable via randr only
   -B, --no-backlight  outputs without backlight configurable via randr only
+  -q, --quiet, --silent  do not print names of outputs
   -h, --help       show help message and exit
 ```
 
@@ -56,6 +57,9 @@ DP2-2
 
 $ xrandrl --disabled --backlight || echo none
 none
+
+$ xrandrl --enabled --backlight --quiet && echo found
+found
 
 $ xrandrl
 eDP2
