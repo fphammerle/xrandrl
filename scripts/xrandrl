@@ -6,7 +6,7 @@ https://cgit.freedesktop.org/xorg/app/xrandr/tree/xrandr.c
 """
 
 import ctypes
-import sys
+import ctypes.util
 
 Time = ctypes.c_ulong
 """
@@ -113,13 +113,38 @@ class XRROutputInfo(ctypes.Structure):
 
 X11 = ctypes.cdll.LoadLibrary("libX11.so")
 Xrandr = ctypes.cdll.LoadLibrary("libXrandr.so")
-Xrandr.XRRGetScreenResourcesCurrent.restype = ctypes.POINTER(
-    XRRScreenResources)
+Xrandr.XRRGetScreenResourcesCurrent.restype = \
+    ctypes.POINTER(XRRScreenResources)
+libc = ctypes.cdll.LoadLibrary(ctypes.util.find_library('c'))
 """
 XRROutputInfo *
 XRRGetOutputInfo (Display *dpy, XRRScreenResources *resources, RROutput output);
 """
 Xrandr.XRRGetOutputInfo.restype = ctypes.POINTER(XRROutputInfo)
+
+
+class RandrOutputInfo:
+
+    def __init__(self,
+                 xdisplay,
+                 screen_resrcs: ctypes.POINTER(XRRScreenResources),
+                 output: RROutput):
+        self._p = Xrandr.XRRGetOutputInfo(xdisplay, screen_resrcs, output)
+
+    def __del__(self):
+        libc.free(self._p)
+
+    @property
+    def enabled(self):
+        return self._p.contents.crtc != 0
+
+    @property
+    def connected(self):
+        return self._p.contents.connection == RR_Connected
+
+    @property
+    def name(self):
+        return self._p.contents.name.decode()
 
 
 def get_xrandr_output_infos(xdisplay):
@@ -128,23 +153,17 @@ def get_xrandr_output_infos(xdisplay):
         X11.XDefaultRootWindow(xdisplay),
     )
     assert isinstance(screen_resrcs.contents, XRRScreenResources)
-    return [Xrandr.XRRGetOutputInfo(xdisplay, screen_resrcs, screen_resrcs.contents.outputs[o])
+    return [RandrOutputInfo(xdisplay, screen_resrcs, screen_resrcs.contents.outputs[o])
             for o in range(screen_resrcs.contents.noutput)]
-
-
-def get_xrandr_output_enabled(output_info):
-    return output_info.contents.crtc != 0
 
 
 def process(connected, disabled, enabled):
     xdisplay = X11.XOpenDisplay(None)
     for output_info in get_xrandr_output_infos(xdisplay):
-        if ((not connected or output_info.contents.connection == RR_Connected)
-                and (not disabled or not get_xrandr_output_enabled(output_info))
-                and (not enabled or get_xrandr_output_enabled(output_info))):
-            output_name = output_info.contents.name \
-                .decode(sys.getfilesystemencoding())
-            print(output_name)
+        if ((not connected or output_info.connected)
+                and (not disabled or not output_info.enabled)
+                and (not enabled or output_info.enabled)):
+            print(output_info.name)
     X11.XCloseDisplay(xdisplay)
 
 
@@ -182,4 +201,5 @@ def main(argv):
     return 0
 
 if __name__ == "__main__":
+    import sys
     sys.exit(main(sys.argv[1:]))
