@@ -19,7 +19,7 @@ $ pip3 install --user --upgrade git+https://github.com/fphammerle/xrandrl
 ## Usage
 
 ```
-xrandrl [-h] [-c] [-d] [-e]
+xrandrl [-h] [-c] [-d] [-e] [-b] [-B]
 
 The exit status is 0 if an output matching the specified criteria was found, otherwise 1.
 
