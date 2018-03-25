@@ -21,6 +21,8 @@ $ pip3 install --user --upgrade git+https://github.com/fphammerle/xrandrl
 ```
 xrandrl [-h] [-c] [-d] [-e]
 
+The exit status is 0 if an output matching the specified criteria was found, otherwise 1.
+
 optional arguments:
   -c, --connected  connected only
   -d, --disabled   disabled only (does not imply --connected)

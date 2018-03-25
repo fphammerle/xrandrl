@@ -202,20 +202,25 @@ def process(connected, disabled, enabled, backlight, no_backlight):
         xdisplay,
         X11.XDefaultRootWindow(xdisplay),
     )
+    found = False
     for output_info in screen_resrcs.get_output_infos():
         if ((not connected or output_info.connected)
                 and (not disabled or not output_info.enabled)
                 and (not enabled or output_info.enabled)
                 and (not backlight or output_info.has_backlight())
                 and (not no_backlight or not output_info.has_backlight())):
+            found = True
             print(output_info.name)
     X11.XCloseDisplay(xdisplay)
+    return found
 
 
 def _init_argparser():
     import argparse
     argparser = argparse.ArgumentParser(
-        description='Show names of outputs available to the X server.',
+        description='Show names of outputs available to the X server.'
+            + ' The exit status is 0 if an output matching the specified criteria'
+            + ' was found, otherwise 1.',
     )
     argparser.add_argument(
         '-c', '--connected',
@@ -252,8 +257,7 @@ def main(argv):
     except ImportError:
         pass
     args = argparser.parse_args(argv)
-    process(**vars(args))
-    return 0
+    return 0 if process(**vars(args)) else 1
 
 if __name__ == "__main__":
     import sys
