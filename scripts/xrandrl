@@ -196,7 +196,7 @@ class RandrOutputInfo:
             return False
 
 
-def process(connected, disabled, enabled, backlight):
+def process(connected, disabled, enabled, backlight, no_backlight):
     xdisplay = X11.XOpenDisplay(None)
     screen_resrcs = RandrScreenResources(
         xdisplay,
@@ -206,7 +206,8 @@ def process(connected, disabled, enabled, backlight):
         if ((not connected or output_info.connected)
                 and (not disabled or not output_info.enabled)
                 and (not enabled or output_info.enabled)
-                and (not backlight or output_info.has_backlight())):
+                and (not backlight or output_info.has_backlight())
+                and (not no_backlight or not output_info.has_backlight())):
             print(output_info.name)
     X11.XCloseDisplay(xdisplay)
 
@@ -235,6 +236,11 @@ def _init_argparser():
         '-b', '--backlight',
         action='store_true',
         help='outputs with backlight configurable via randr only',
+    )
+    argparser.add_argument(
+        '-B', '--no-backlight',
+        action='store_true',
+        help='outputs without backlight configurable via randr only',
     )
     return argparser
 
