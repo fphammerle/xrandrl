@@ -8,7 +8,7 @@ https://cgit.freedesktop.org/xorg/app/xrandr/tree/xrandr.c
 import ctypes
 import ctypes.util
 
-Time = ctypes.c_ulong
+X_Time = ctypes.c_ulong
 """
 #ifndef _XTYPEDEF_XID
 #  define _XTYPEDEF_XID
@@ -19,34 +19,34 @@ typedef CARD32 XID;
 #  endif
 #endif
 """
-XID = ctypes.c_ulong
+X_XID = ctypes.c_ulong
 """
 typedef XID RROutput;
 """
-RROutput = XID
+X_RROutput = X_XID
 """
 typedef XID RRCrtc;
 """
-RRCrtc = XID
+X_RRCrtc = X_XID
 """ /usr/include/X11/extensions/Xrandr.h
 typedef XID RRMode;
 """
-RRMode = XID
+X_RRMode = X_XID
 """ /usr/include/X11/extensions/randr.h
 #define RR_Connected		0
 """
-RR_Connected = 0
+X_RR_Connected = 0
 """ /usr/include/X11/extensions/randr.h
 typedef unsigned short	Connection;
 """
-Connection = ctypes.c_ushort
+X_Connection = ctypes.c_ushort
 """ /usr/include/X11/extensions/randr.h
 typedef unsigned short	SubpixelOrder;
 """
-SubpixelOrder = ctypes.c_ushort
+X_SubpixelOrder = ctypes.c_ushort
 
 
-class XRRScreenResources(ctypes.Structure):
+class X_XRRScreenResources(ctypes.Structure):
 
     """ /usr/include/X11/extensions/Xrandr.h
     typedef struct _XRRScreenResources {
@@ -61,18 +61,18 @@ class XRRScreenResources(ctypes.Structure):
     } XRRScreenResources;
     """
     _fields_ = [
-        ('timestamp', Time),
-        ('configTimestamp', Time),
+        ('timestamp', X_Time),
+        ('configTimestamp', X_Time),
         ('ncrtc', ctypes.c_int),
-        ('crtcs', ctypes.POINTER(RRCrtc)),
+        ('crtcs', ctypes.POINTER(X_RRCrtc)),
         ('noutput', ctypes.c_int),
-        ('outputs', ctypes.POINTER(RROutput)),
+        ('outputs', ctypes.POINTER(X_RROutput)),
         ('nmode', ctypes.c_int),
         ('modes', ctypes.c_void_p),  # ctypes.POINTER(XRRModeInfo)
     ]
 
 
-class XRROutputInfo(ctypes.Structure):
+class X_XRROutputInfo(ctypes.Structure):
 
     """
     typedef struct _XRROutputInfo {
@@ -94,41 +94,41 @@ class XRROutputInfo(ctypes.Structure):
     } XRROutputInfo;
     """
     _fields_ = [
-        ('timestamp', Time),
-        ('crtc', RRCrtc),
+        ('timestamp', X_Time),
+        ('crtc', X_RRCrtc),
         ('name', ctypes.c_char_p),
         ('nameLen', ctypes.c_int),
         ('mm_width', ctypes.c_ulong),
         ('mm_height', ctypes.c_ulong),
-        ('connection', Connection),
-        ('subpixel_order', SubpixelOrder),
+        ('connection', X_Connection),
+        ('subpixel_order', X_SubpixelOrder),
         ('ncrtc', ctypes.c_int),
-        ('crtcs', ctypes.POINTER(RRCrtc)),
+        ('crtcs', ctypes.POINTER(X_RRCrtc)),
         ('nclone', ctypes.c_int),
-        ('clones', ctypes.POINTER(RROutput)),
+        ('clones', ctypes.POINTER(X_RROutput)),
         ('nmode', ctypes.c_int),
         ('npreferred', ctypes.c_int),
-        ('modes', ctypes.POINTER(RRMode)),
+        ('modes', ctypes.POINTER(X_RRMode)),
     ]
 
 X11 = ctypes.cdll.LoadLibrary("libX11.so")
 Xrandr = ctypes.cdll.LoadLibrary("libXrandr.so")
 Xrandr.XRRGetScreenResourcesCurrent.restype = \
-    ctypes.POINTER(XRRScreenResources)
+    ctypes.POINTER(X_XRRScreenResources)
 libc = ctypes.cdll.LoadLibrary(ctypes.util.find_library('c'))
 """
 XRROutputInfo *
 XRRGetOutputInfo (Display *dpy, XRRScreenResources *resources, RROutput output);
 """
-Xrandr.XRRGetOutputInfo.restype = ctypes.POINTER(XRROutputInfo)
+Xrandr.XRRGetOutputInfo.restype = ctypes.POINTER(X_XRROutputInfo)
 
 
 class RandrOutputInfo:
 
     def __init__(self,
                  xdisplay,
-                 screen_resrcs: ctypes.POINTER(XRRScreenResources),
-                 output: RROutput):
+                 screen_resrcs: ctypes.POINTER(X_XRRScreenResources),
+                 output: X_RROutput):
         self._p = Xrandr.XRRGetOutputInfo(xdisplay, screen_resrcs, output)
 
     def __del__(self):
@@ -140,7 +140,7 @@ class RandrOutputInfo:
 
     @property
     def connected(self):
-        return self._p.contents.connection == RR_Connected
+        return self._p.contents.connection == X_RR_Connected
 
     @property
     def name(self):
@@ -152,7 +152,7 @@ def get_xrandr_output_infos(xdisplay):
         xdisplay,
         X11.XDefaultRootWindow(xdisplay),
     )
-    assert isinstance(screen_resrcs.contents, XRRScreenResources)
+    assert isinstance(screen_resrcs.contents, X_XRRScreenResources)
     return [RandrOutputInfo(xdisplay, screen_resrcs, screen_resrcs.contents.outputs[o])
             for o in range(screen_resrcs.contents.noutput)]
 
