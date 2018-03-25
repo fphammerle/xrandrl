@@ -45,21 +45,21 @@ typedef unsigned short	SubpixelOrder;
 """
 SubpixelOrder = ctypes.c_ushort
 
-""" /usr/include/X11/extensions/Xrandr.h
-typedef struct _XRRScreenResources {
-    Time	timestamp;
-    Time	configTimestamp;
-    int		ncrtc;
-    RRCrtc	*crtcs;
-    int		noutput;
-    RROutput	*outputs;
-    int		nmode;
-    XRRModeInfo	*modes;
-} XRRScreenResources;
-"""
-
 
 class XRRScreenResources(ctypes.Structure):
+
+    """ /usr/include/X11/extensions/Xrandr.h
+    typedef struct _XRRScreenResources {
+        Time	timestamp;
+        Time	configTimestamp;
+        int		ncrtc;
+        RRCrtc	*crtcs;
+        int		noutput;
+        RROutput	*outputs;
+        int		nmode;
+        XRRModeInfo	*modes;
+    } XRRScreenResources;
+    """
     _fields_ = [
         ('timestamp', Time),
         ('configTimestamp', Time),
@@ -71,28 +71,28 @@ class XRRScreenResources(ctypes.Structure):
         ('modes', ctypes.c_void_p),  # ctypes.POINTER(XRRModeInfo)
     ]
 
-"""
-typedef struct _XRROutputInfo {
-    Time	    timestamp;
-    RRCrtc	    crtc;
-    char	    *name;
-    int		    nameLen;
-    unsigned long   mm_width;
-    unsigned long   mm_height;
-    Connection	    connection;
-    SubpixelOrder   subpixel_order;
-    int		    ncrtc;
-    RRCrtc	    *crtcs;
-    int		    nclone;
-    RROutput	    *clones;
-    int		    nmode;
-    int		    npreferred;
-    RRMode	    *modes;
-} XRROutputInfo;
-"""
-
 
 class XRROutputInfo(ctypes.Structure):
+
+    """
+    typedef struct _XRROutputInfo {
+        Time	    timestamp;
+        RRCrtc	    crtc;
+        char	    *name;
+        int		    nameLen;
+        unsigned long   mm_width;
+        unsigned long   mm_height;
+        Connection	    connection;
+        SubpixelOrder   subpixel_order;
+        int		    ncrtc;
+        RRCrtc	    *crtcs;
+        int		    nclone;
+        RROutput	    *clones;
+        int		    nmode;
+        int		    npreferred;
+        RRMode	    *modes;
+    } XRROutputInfo;
+    """
     _fields_ = [
         ('timestamp', Time),
         ('crtc', RRCrtc),
