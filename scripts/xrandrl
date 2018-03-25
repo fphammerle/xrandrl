@@ -6,7 +6,6 @@ https://cgit.freedesktop.org/xorg/app/xrandr/tree/xrandr.c
 """
 
 import ctypes
-import ctypes.util
 
 X_Time = ctypes.c_ulong
 """
@@ -115,7 +114,6 @@ X11 = ctypes.cdll.LoadLibrary("libX11.so")
 Xrandr = ctypes.cdll.LoadLibrary("libXrandr.so")
 Xrandr.XRRGetScreenResourcesCurrent.restype = \
     ctypes.POINTER(X_XRRScreenResources)
-libc = ctypes.cdll.LoadLibrary(ctypes.util.find_library('c'))
 """
 XRROutputInfo *
 XRRGetOutputInfo (Display *dpy, XRRScreenResources *resources, RROutput output);
@@ -130,7 +128,7 @@ class RandrScreenResources:
         self._p = Xrandr.XRRGetScreenResourcesCurrent(xdisplay, window)
 
     def __del__(self):
-        libc.free(self._p)
+        X11.XFree(self._p)
 
     @property
     def outputs(self):
@@ -150,7 +148,7 @@ class RandrOutputInfo:
         )
 
     def __del__(self):
-        libc.free(self._p)
+        X11.XFree(self._p)
 
     @property
     def enabled(self):
