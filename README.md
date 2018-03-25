@@ -25,6 +25,7 @@ optional arguments:
   -c, --connected  connected only
   -d, --disabled   disabled only (does not imply --connected)
   -e, --enabled    enabled only (does not imply --connected)
+  -b, --backlight  outputs with backlight configurable via randr only
   -h, --help       show help message and exit
 ```
 
@@ -42,6 +43,9 @@ DP2-2
 
 $ xrandrl --connected --disabled
 DP2-1
+
+$ xrandrl --backlight
+eDP2
 
 $ xrandrl
 eDP2

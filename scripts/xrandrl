@@ -43,6 +43,17 @@ X_Connection = ctypes.c_ushort
 typedef unsigned short	SubpixelOrder;
 """
 X_SubpixelOrder = ctypes.c_ushort
+""" /usr/include/X11/Xdefs.h
+#ifndef _XTYPEDEF_ATOM
+#  define _XTYPEDEF_ATOM
+#  ifndef _XSERVER64
+typedef unsigned long Atom;
+#  else
+typedef CARD32 Atom;
+#  endif
+#endif
+"""
+X_Atom = ctypes.c_ulong
 
 
 class X_XRRScreenResources(ctypes.Structure):
@@ -119,6 +130,7 @@ XRROutputInfo *
 XRRGetOutputInfo (Display *dpy, XRRScreenResources *resources, RROutput output);
 """
 Xrandr.XRRGetOutputInfo.restype = ctypes.POINTER(X_XRROutputInfo)
+Xrandr.XRRListOutputProperties.restype = ctypes.POINTER(X_Atom)
 
 
 class RandrScreenResources:
@@ -141,8 +153,10 @@ class RandrScreenResources:
 class RandrOutputInfo:
 
     def __init__(self, screen_resrcs: RandrScreenResources, output: X_RROutput):
+        self._xdisplay = screen_resrcs._xdisplay
+        self._output = output
         self._p = Xrandr.XRRGetOutputInfo(
-            screen_resrcs._xdisplay,
+            self._xdisplay,
             screen_resrcs._p,
             output,
         )
@@ -162,8 +176,27 @@ class RandrOutputInfo:
     def name(self):
         return self._p.contents.name.decode()
 
+    def _get_property_atoms_list(self):
+        nprop = ctypes.c_int()
+        props = Xrandr.XRRListOutputProperties(
+            self._xdisplay,
+            self._output,
+            ctypes.pointer(nprop),
+        )
+        atoms = [props[i] for i in range(nprop.value)]
+        X11.XFree(props)
+        return atoms
 
-def process(connected, disabled, enabled):
+    def has_backlight(self):
+        atom = X11.XInternAtom(self._xdisplay, b'Backlight', True)
+        if atom:
+            props = self._get_property_atoms_list()
+            return atom in props
+        else:
+            return False
+
+
+def process(connected, disabled, enabled, backlight):
     xdisplay = X11.XOpenDisplay(None)
     screen_resrcs = RandrScreenResources(
         xdisplay,
@@ -172,7 +205,8 @@ def process(connected, disabled, enabled):
     for output_info in screen_resrcs.get_output_infos():
         if ((not connected or output_info.connected)
                 and (not disabled or not output_info.enabled)
-                and (not enabled or output_info.enabled)):
+                and (not enabled or output_info.enabled)
+                and (not backlight or output_info.has_backlight())):
             print(output_info.name)
     X11.XCloseDisplay(xdisplay)
 
@@ -196,6 +230,11 @@ def _init_argparser():
         '-e', '--enabled',
         action='store_true',
         help='enabled only (does not imply --connected)',
+    )
+    argparser.add_argument(
+        '-b', '--backlight',
+        action='store_true',
+        help='outputs with backlight configurable via randr only',
     )
     return argparser
 
