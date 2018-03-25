@@ -54,6 +54,9 @@ $ xrandrl --no-backlight --connected
 DP2-1
 DP2-2
 
+$ xrandrl --disabled --backlight || echo none
+none
+
 $ xrandrl
 eDP2
 DP1
